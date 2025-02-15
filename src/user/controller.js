@@ -98,7 +98,7 @@ export const signin = async (req, res) => {
       return res.redirect("/admin/dashboard");
     } else if (user.role === "user") {
       return res.redirect(
-        "/home2?message=Chào mừng bạn đến với cửa hàng Coffee House!"
+        "/home2?message=Chào mừng bạn đến với cửa hàng Manga World!"
       );
     } else {
       return res.status(403).render("signin", {

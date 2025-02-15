@@ -137,7 +137,7 @@ export const handleCheckout = async (req, res) => {
         });
 
         let emailBody = `
-            <p>Cửa hàng cafe Coffe House xin chào.</p>
+            <p>Cửa hàng Manga World xin chào.</p>
             <p>Cảm ơn bạn đã đặt hàng, ${fullName}!</p>
             <p>Địa chỉ giao hàng của bạn là: ${address}, ${ward}, ${district}, ${city}</p>
             <p>Số điện thoại: ${phoneNumber}</p>
@@ -148,7 +148,7 @@ export const handleCheckout = async (req, res) => {
             <ul>
                 ${cart.items.map(item => `<li>${item.productId.name}: ${item.productId.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })} x ${item.quantity}</li>`).join('')}
             </ul>
-            <p>Coffee House xin chân thành cảm ơn vì sự ủng hộ và tin tưởng của bạn</p>
+            <p>Manga World xin chân thành cảm ơn vì sự ủng hộ và tin tưởng của bạn</p>
         `;
 
         const mailOptions = {
