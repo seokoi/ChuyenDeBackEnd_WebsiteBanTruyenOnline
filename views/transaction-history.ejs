@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch sử giao dịch</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table th {
+            background: #3498db;
+            color: #fff;
+            padding: 15px;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        table td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        table tr:hover td {
+            background-color: #f8f9fa;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin: 30px 0;
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .back-btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .cancel-btn {
+            padding: 8px 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background-color: #f1c40f;
+            color: #000;
+        }
+
+        .status-shipping {
+            background-color: #3498db;
+            color: #fff;
+        }
+
+        .status-delivered {
+            background-color: #2ecc71;
+            color: #fff;
+        }
+
+        .status-cancelled {
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            table {
+                display: block;
+                overflow-x: auto;
+            }
+
+            table th, table td {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lịch sử giao dịch</h1>
+        <% if (transactions.length > 0) { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ngày</th>
+                    <th>Tổng tiền</th>
+                    <th>Địa chỉ</th>
+                    <th>Phương thức thanh toán</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% transactions.forEach(transaction => { %>
+                <tr>
+                    <td><%= new Date(transaction.createdAt).toLocaleString('vi-VN') %></td>
+                    <td><strong><%= transaction.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></strong></td>
+                    <td><%= `${transaction.address}, ${transaction.ward}, ${transaction.district}, ${transaction.city}` %></td>
+                    <td><%= transaction.paymentMethod === 'cod' ? 'Thanh toán khi nhận hàng' : 'Chuyển khoản' %></td>
+                    <td>
+                        <span class="status-badge <%= 
+                            transaction.status === 'Chờ xác nhận' ? 'status-pending' :
+                            transaction.status === 'Đang giao' ? 'status-shipping' :
+                            transaction.status === 'Đã giao' ? 'status-delivered' :
+                            'status-cancelled'
+                        %>">
+                            <%= transaction.status %>
+                        </span>
+                    </td>
+                    <td>
+                        <% if (!["Đang giao", "Đã giao"].includes(transaction.status)) { %>
+                            <button onclick="cancelOrder('<%= transaction._id %>')" class="cancel-btn">Hủy đơn</button>
+                        <% } else { %>
+                            <span style="color: #95a5a6;">Không thể hủy</span>
+                        <% } %>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+        <div class="empty-message">
+            <p>Không có lịch sử giao dịch nào.</p>
+        </div>
+        <% } %>
+
+        <a href="/home2" class="back-btn">Trở về trang chủ</a>
+    </div>
+
+    <script>
+        function cancelOrder(transactionId) {
+            if (confirm("Bạn có chắc chắn muốn hủy đơn hàng này không?")) {
+                fetch(`/transactions/cancel/${transactionId}`, { 
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload();
+                })
+                .catch(error => {
+                    console.error("Lỗi khi hủy đơn:", error);
+                    alert("Có lỗi xảy ra khi hủy đơn hàng!");
+                });
+            }
+        }
+    </script>
+</body>
+</html>

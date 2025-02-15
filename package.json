@@ -1,0 +1,32 @@
+{
+    "name": "btvn",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "dev": "vite"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": "",
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "connect-mongo": "^5.1.0",
+        "cookie-parser": "^1.4.7",
+        "dotenv": "^16.4.7",
+        "ejs": "^3.1.10",
+        "express": "^4.21.2",
+        "express-session": "^1.18.1",
+        "joi": "^17.13.3",
+        "mongoose": "^8.8.4",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.5-lts.1",
+        "nodemailer": "^6.9.16",
+        "qrcode": "^1.5.4",
+        "vite-plugin-commonjs": "^0.10.4"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^28.0.2",
+        "vite-plugin-node": "^4.0.0"
+    }
+}

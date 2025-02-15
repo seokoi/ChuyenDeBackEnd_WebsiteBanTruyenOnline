@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Thanh toán</title>
+    <style>
+      :root {
+        --primary-color: #c17f59;
+        --secondary-color: #8b573c;
+        --bg-dark: #2c1306;
+        --text-light: #e6b17e;
+        --success: #28a745;
+        --error: #dc3545;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        background: linear-gradient(135deg, #f5f7fa 0%, #e4e9f2 100%);
+        color: #2c1810;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+      }
+
+      header {
+        background-color: var(--bg-dark);
+        width: 100%;
+        padding: 1rem 0;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      header h1 {
+        font-size: 2rem;
+        font-weight: 600;
+        margin: 0;
+        color: var(--text-light);
+        font-family: "Playfair Display", serif;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: #ffffff;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+      }
+
+      h2 {
+        color: var(--primary-color);
+        font-family: "Playfair Display", serif;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+      }
+
+      form {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      label {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #2c1810;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        font-size: 1rem;
+        border: 1px solid #e1e1e1;
+        border-radius: 8px;
+        background: #fff;
+        color: #2c1810;
+        transition: all 0.3s ease;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(193, 127, 89, 0.2);
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
+
+      .payment-method {
+        background: #f8f9fa;
+        padding: 1.2rem;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+      }
+
+      .payment-method label {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        padding: 0.5rem;
+        transition: all 0.3s ease;
+      }
+
+      .payment-method label:hover {
+        background: rgba(193, 127, 89, 0.1);
+        border-radius: 4px;
+      }
+
+      input[type="radio"] {
+        width: auto;
+        margin-right: 8px;
+        accent-color: var(--primary-color);
+      }
+
+      .total-container {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-radius: 8px;
+        text-align: center;
+        margin: 1.5rem 0;
+        border: 2px solid var(--primary-color);
+      }
+
+      .total-container p {
+        font-size: 1.2rem;
+        color: #2c1810;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .total-amount {
+        color: var(--primary-color);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+      }
+
+      button {
+        background: var(--primary-color);
+        color: white;
+        padding: 1rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+      }
+
+      button:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .container {
+          margin: 1rem;
+          padding: 1.5rem;
+        }
+
+        .row {
+          grid-template-columns: 1fr;
+        }
+
+        header h1 {
+          font-size: 1.5rem;
+        }
+      }
+
+      /* Error States */
+      .error {
+        color: var(--error);
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+      }
+
+      input.error,
+      select.error {
+        border-color: var(--error);
+      }
+
+      /* Success States */
+      .success-message {
+        background: #d4edda;
+        color: #155724;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        text-align: center;
+      }
+
+      /* Loading State */
+      button.loading {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      /* Custom Select Styling */
+      select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%232c1810' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 1rem center;
+        padding-right: 2.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Thanh toán đơn hàng</h1>
+    </header>
+
+    <div class="container">
+      <h2>Thông tin thanh toán</h2>
+      <form action="/checkout" method="POST">
+        <label for="fullName">Họ và Tên:</label>
+        <input
+          type="text"
+          id="fullName"
+          name="fullName"
+          placeholder="Nhập họ và tên"
+          required
+        />
+
+        <label for="phoneNumber">Số điện thoại:</label>
+        <input
+          type="text"
+          id="phoneNumber"
+          name="phoneNumber"
+          placeholder="Nhập số điện thoại"
+          required
+        />
+
+        <label for="address">Địa chỉ chi tiết:</label>
+        <input
+          type="text"
+          id="address"
+          name="address"
+          placeholder="Số nhà, tên đường"
+          required
+        />
+
+        <div class="row">
+          <div>
+            <label for="city">Tỉnh/Thành phố:</label>
+            <select id="city" name="city" required>
+              <option value="" disabled selected>Chọn Tỉnh/Thành phố</option>
+              <option value="hanoi">Hà Nội</option>
+              <option value="bacninh">Bắc Ninh</option>
+              <option value="hanam">Hà Nam</option>
+              <option value="haiduong">Hải Dương</option>
+              <option value="haiphong">Hải Phòng</option>
+              <option value="hungyen">Hưng Yên</option>
+              <option value="namdinh">Nam Định</option>
+              <option value="thaibinh">Thái Bình</option>
+              <option value="vinhphuc">Vĩnh Phúc</option>
+              <option value="ninhbinh">Ninh Bình</option>
+              <option value="hoabinh">Hòa Bình</option>
+              <option value="sonla">Sơn La</option>
+              <option value="dienbien">Điện Biên</option>
+              <option value="laichau">Lai Châu</option>
+              <option value="laocai">Lào Cai</option>
+              <option value="yenbai">Yên Bái</option>
+              <option value="phutho">Phú Thọ</option>
+              <option value="hagiang">Hà Giang</option>
+              <option value="tuyenquang">Tuyên Quang</option>
+              <option value="caobang">Cao Bằng</option>
+              <option value="baccan">Bắc Cạn</option>
+              <option value="thainguyen">Thái Nguyên</option>
+              <option value="langson">Lạng Sơn</option>
+              <option value="bacgiang">Bắc Giang</option>
+              <option value="quangninh">Quảng Ninh</option>
+              <option value="thanhhoa">Thanh Hóa</option>
+              <option value="nghean">Nghệ An</option>
+              <option value="hatinh">Hà Tĩnh</option>
+              <option value="quangbinh">Quảng Bình</option>
+              <option value="quangtri">Quảng Trị</option>
+              <option value="thuathienhue">Thừa Thiên Huế</option>
+              <option value="danang">Đà Nẵng</option>
+              <option value="quangnam">Quảng Nam</option>
+              <option value="quangngai">Quãng Ngãi</option>
+              <option value="binhdinh">Bình Định</option>
+              <option value="phuyen">Phú Yên</option>
+              <option value="khanhhoa">Khánh Hòa</option>
+              <option value="ninhthuan">Ninh Thuận</option>
+              <option value="binhthuan">Bình Thuận</option>
+              <option value="kontum">Kon Tum</option>
+              <option value="danang">Gia Lai</option>
+              <option value="daklak">Đak lak</option>
+              <option value="daknong">Đak Nong</option>
+              <option value="lamdong">Lâm Đồng</option>
+              <option value="hochiminh">Hồ Chí Minh</option>
+              <option value="bariavungtau">Bà Rịa Vũng Tàu</option>
+              <option value="binhduong">Bình Dương</option>
+              <option value="binhphuoc">Bình Phước</option>
+              <option value="dongnai">Đồng Nai</option>
+              <option value="tayninh">Tây Ninh</option>
+              <option value="angiang">An Giang</option>
+              <option value="baclieu">Bạc Liêu</option>
+              <option value="bentre">Bến Tre</option>
+              <option value="danang">Đà Nẵng</option>
+              <option value="camau">Cà Mau</option>
+              <option value="cantho">Cần Thơ</option>
+              <option value="dongthap">Đồng Tháp</option>
+              <option value="haugiang">Hậu Giang</option>
+              <option value="kiengiang">Kiên Giang</option>
+              <option value="longan">Long An</option>
+              <option value="soctrang">Sóc Trăng</option>
+              <option value="tiengiang">Tiền Giang</option>
+              <option value="travinh">Trà Vinh</option>
+              <option value="vinhlong">Vĩnh Long</option>
+            </select>
+          </div>
+          <div>
+            <label for="district">Quận/Huyện:</label>
+            <select id="district" name="district" required>
+              <option value="" disabled selected>Chọn Quận/Huyện</option>
+            </select>
+          </div>
+        </div>
+
+        <label for="ward">Phường/Xã:</label>
+        <select id="ward" name="ward" required>
+          <option value="" disabled selected>Chọn Phường/Xã</option>
+        </select>
+
+        <div class="payment-method">
+          <label>
+            <input
+              type="radio"
+              id="cod"
+              name="paymentMethod"
+              value="cod"
+              required
+            />
+            Thanh toán khi nhận hàng
+          </label>
+          <label>
+            <input
+              type="radio"
+              id="transfer"
+              name="paymentMethod"
+              value="transfer"
+            />
+            Chuyển khoản
+          </label>
+        </div>
+
+        <div class="total-container">
+          Tổng thanh toán: <%= total ? total.toLocaleString('vi-VN', { style:
+          'currency', currency: 'VND' }) : "0 VND" %>
+        </div>
+
+        <button type="submit">Thanh toán</button>
+      </form>
+    </div>
+  </body>
+  <script>
+    const districts = {
+      //Bắc Bộ
+      hanoi: [
+        "Ba Đình",
+        "Hoàn Kiếm",
+        "Cầu Giấy",
+        "Hai Bà Trưng",
+        "Hoàng Mai",
+        "Tây Hồ",
+        "Thanh Xuân",
+        "Ba Vì",
+        "Chương Mỹ",
+        "Đan Phượng",
+        "Đông Anh",
+        "Gia Lâm",
+        "Hoài Đức",
+        "Mê Linh",
+        "Mỹ Đức",
+        "Phú Xuyên",
+        "Phúc Thọ",
+        "Quốc Oai",
+        "Sóc Sơn",
+      ],
+      bacninh: [
+        "Tp. Bắc Ninh",
+        "TP.Từ Sơn",
+        "Thị Xã Quế Võ ",
+        "Thị Xã Thuận Thành",
+        "Huyện Yên Phong",
+        "Huyện Tiên Du",
+        "Huyện Gia Bình",
+        "Huyện Lương Tài",
+      ],
+      hanam: [
+        "Thành phố Phủ Lý",
+        "Thị xã Duy Tiên",
+        "Huyện Bình Lục",
+        "Huyện Kim Bảng",
+        "Huyện Lý Nhân",
+        "Huyện Thanh Liêm",
+      ],
+      haiduong: [
+        "thành phố Hải Dương",
+        "thành phố Chí Linh",
+        "thị xã Kinh Môn",
+        "huyện Bình Giang",
+        "huyện Cẩm Giang",
+        "huyện Gia Lộc",
+        "huyện Kim Thành",
+        "huyện Nam Sách",
+        "huyện Ninh Giang",
+        "huyện Thanh Hà",
+        "huyện Thanh Miện",
+        "huyện Tứ Kỳ",
+      ],
+      haiphong: [
+        "quận Đồ Sơn",
+        "quận Dương Kinh",
+        "quận Hải An",
+        "quận Hồng Bàng",
+        "quận Kiến An",
+        "quận Lê Chân",
+        "quận Ngô Quyền",
+        "huyện An Dương",
+        "huyện An Lão",
+        "huyện Cát Hải",
+        "huyện Kiến Thụy",
+        "huyện Thủy Nguyên",
+        "huyện Tiên Lãng",
+        "huyện Vĩnh Bảo",
+      ],
+      hungyen: [
+        "thành phố Hưng Yên",
+        "thị xã Mỹ Hào",
+        "huyện Ân Thi",
+        "huyện Khoái Châu",
+        "huyện Kim Động",
+        "huyện Phù Cừ",
+        "huyện Tiên Lữ",
+        "huyện Văn Giang",
+        "huyện Văn Lâm",
+        "huyện Yên Mỹ",
+      ],
+      namdinh: [
+        "thành phố Nam Định",
+        "huyện Giao Thủy",
+        "huyện Hải Hậu",
+        "huyện Mỹ Lộc",
+        "huyện Nam Trực",
+        "huyện Nghĩa Hưng",
+        "huyện Nghĩa Hưng",
+        "huyện Trực Ninh",
+        "huyện Vụ Bản",
+        "huyện Xuân Trường",
+        "huyện Ý Yên",
+      ],
+      thaibinh: [
+        "thành phố Thái Bình",
+        "huyện Đông Hưng",
+        "huyện Hưng Hà",
+        "huyện Kiến Xương",
+        "huyện Quỳnh Phụ",
+        "huyện Thái Thụy",
+        "huyện Tiền Hải",
+        "huyện Vũ Thư",
+      ],
+      vinhphuc: [
+        "thành phố Vĩnh Yên",
+        "thành phố Phúc Yên",
+        "huyện Bình Xuyên",
+        "huyện Lập Thạch",
+        "huyện Sông Lô",
+        "huyện Tam Đảo",
+        "huyện Tam Dương",
+        "huyện Vĩnh Tường",
+        "huyện Yên Lạc",
+      ],
+      ninhbinh: [
+        "thành phố Ninh Bình",
+        "thành phố Tam Điệp",
+        "huyện Gia Viễn",
+        "huyện Hoa Lư",
+        "huyện Kim Sơn",
+        "huyện Nho Quan",
+        "huyện Yên Khánh",
+        "huyện Yên Mô",
+      ],
+      hoabinh: [
+        "thành phố Hoà Bình",
+        "huyện Cao Phong",
+        "huyện Đà Bắc",
+        "huyện Kim Bôi",
+        "huyện Lạc Sơn",
+        "huyện Lạc Thuỷ",
+        "huyện Lương Sơn",
+        "huyện Mai Châu",
+        "huyện Tân Lạc",
+        "huyện Yên Thuỷ",
+      ],
+      sonla: [
+        "thành phố Sơn La",
+        "huyện Bắc Yên",
+        "huyện Mai Sơn",
+        "huyện Mộc Châu",
+        " huyện Mường La",
+        "huyện Phù Yên",
+        "huyện Quỳnh Nhai",
+        " huyện Thuận Châu",
+        "huyện Yên Châu",
+        "huyện Sông Mã",
+        "huyện Sốp Cộp",
+        "huyện Vân Hồ",
+      ],
+      dienbien: [
+        "thành phố Điện Biên Phủ",
+        "thị xã Mường Lay",
+        "huyện Điện Biên",
+        "huyện Điện Biên Đông",
+        "huyện Mường Ảng",
+        "huyện Mường Chà",
+        "huyện Mường Nhé",
+        "huyện Nậm Pồ",
+        "huyện Tủa Chùa",
+        "huyện Tuần Giáo",
+      ],
+      laichau: [
+        "thành phố Lai Châu",
+        "huyện Tam Đường",
+        "huyện Mường Tè",
+        "huyện Sìn Hồ",
+        "huyện Phong Thổ",
+        "huyện Than Uyên",
+        "huyện Tân Uyên",
+        "huyện Nậm Nhùn",
+      ],
+      laocai: [
+        "thành phố Lào Cai",
+        "thị xã Sa Pa",
+        "huyện Bảo Thắng",
+        "huyện Bảo Yên",
+        "huyện Bát Xát",
+        "huyện Bắc Hà",
+        "huyện Mường Khương",
+        "huyện Si Ma Cai",
+        "huyện Văn Bàn",
+      ],
+      yenbai: [
+        "thành phố Yên Bái",
+        "thị xã Nghĩa Lộ",
+        "huyện Lục Yên",
+        "huyện Mù Căng Chải",
+        "huyện Trạm Tấu",
+        "huyện Trấn Yên",
+        "huyện Văn Chấn",
+        "huyện Văn Yên",
+        "huyện Yên Bình",
+      ],
+      phutho: ["Tp Việt Trì", "Thị xã Phú Thọ", "Cẩm Khê", "Thanh Thủy"],
+      hagiang: ["Quận 1", "Quận 2", "Quận 7", "Thủ Đức"],
+      tuyenquang: [
+        "thành phố Tuyên Quang",
+        "huyện Lâm Bình",
+        "huyện Nà Hang",
+        "huyện Chiêm Hóa",
+        "huyện Hàm Yên",
+        "huyện Yên Sơn",
+        "huyện Sơn Dương",
+      ],
+      caobang: [
+        "Thành phố Cao Bằng",
+        "Huyện Bảo Lạc",
+        "Huyện Bảo Lâm",
+        "Huyện Hạ Lang",
+        "Huyện Hà Quảng",
+        "Huyện Hòa An",
+        "Huyện Nguyên Bình",
+        "Huyện Quảng Hòa",
+        "Huyện Thạch An",
+        "Huyện Trùng Khánh",
+      ],
+      backan: [
+        "Thành phố Bắc Kạn",
+        "Huyện Pác Nặm",
+        "Huyện Ngân Sơn",
+        "Huyện Na Rì",
+        "Huyện Chợ Đồn",
+        "Huyện Chợ Mới",
+        "Huyện Bạch Thông",
+        "Huyện Ba Bể",
+      ],
+      thainguyen: [
+        "thành phố Thái Nguyên",
+        "thành phố Sông Công",
+        "thị xã Phổ Yên",
+        "huyện Đại Từ",
+        "huyện Định Hóa",
+        "huyện Võ Nhai",
+        "huyện Đồng Hỷ",
+        "huyện Phú Bình",
+        "huyện Phú Lương",
+        "huyện Phú Lương",
+        "huyện Võ Nhai",
+      ],
+      langson: [
+        "Thành phố Lạng Sơn",
+        "Huyện Bắc Sơn",
+        "Huyện Bình Gia",
+        "Huyện Cao Lộc",
+        "Huyện Chi Lăng",
+        "Huyện Đình Lập",
+        "Huyện Hữu Lũng",
+        "Huyện Lộc Bình",
+        "Huyện Tràng Định",
+        "Huyện Văn Lãng",
+        "Huyện Văn Quan",
+      ],
+      bacgiang: [
+        "Thành phố Bắc Giang",
+        "Huyện Hiệp Hoà",
+        "Huyện Lạng Giang",
+        "Huyện Lục Nam",
+        "Huyện Lục Ngạn",
+        "Huyện Sơn Động",
+        "Huyện Tân Yên",
+        "Huyện Việt Yên",
+        "Huyện Yên Dũng",
+        "Huyện Yên Thế",
+      ],
+      quangninh: [
+        "thành phố Hạ Long",
+        "thành phố Móng Cái",
+        "thành phố Cẩm Phả",
+        "thành phố Uông Bí",
+        "huyện Bình Liêu",
+        "huyện Đầm Hà",
+        "huyện Hải Hà",
+        "huyện Ba Chẽ",
+        "huyện Vân Đồn",
+        "thị xã Đông Triều",
+        "thị xã Quảng Yên",
+        "huyện Cô Tô",
+      ],
+      // Trung Bộ
+      thanhhoa: [
+        "thành phố Thanh Hoá",
+        "Thành phố Sầm Sơn",
+        "Thị xã Bỉm Sơn",
+        "Thị xã Nghi Sơn",
+        "huyện Bá Thước",
+        "huyện Cẩm Thủy",
+        "huyện Đông Sơn",
+        "huyện Hà Trung",
+        "huyện Hậu Lộc",
+        "huyện Hoằng Hóa",
+        "huyện Lang Chánh",
+        "huyện Mường Lát",
+        "huyện Nga Sơn",
+        "huyện Ngọc Lặc",
+        "huyện Như Thanh",
+        "huyện Như Xuân",
+        "huyện Nông Cống",
+        "huyện Quan Hóa",
+        "huyện Quan Sơn",
+        " huyện Quảng Xương",
+        "huyện Thạch Thành",
+        "huyện Thiệu Hóa",
+        "huyện Thọ Xuân",
+        "huyện Thường Xuân",
+        "huyện Triệu Sơn",
+        "huyện Vĩnh Lộc",
+        "huyện Yên Định",
+      ],
+      nghean: [
+        "thành phố Vinh",
+        "thị xã Cửa Lò",
+        "thị xã Hoàng Mai",
+        "thị xã Thái Hòa",
+        "huyện Anh Sơn",
+        "huyện Con Cuông",
+        "huyện Diễn Châu",
+        "huyện Đô Lương",
+        "huyện Hưng Nguyên",
+        "huyện Kỳ Sơn",
+        "huyện Nam Đàn",
+        "huyện Nghi Lộc",
+        "huyện Nghĩa Đàn",
+        "huyện Quế Phong",
+        "huyện Quỳ Châu",
+        "huyện Quỳ Hợp",
+        "huyện Quỳnh Lưu",
+        "huyện Tân Kỳ",
+        "huyện Thanh Chương",
+        "huyện Tương Dương",
+        "huyện Yên Thành",
+      ],
+      hatinh: [
+        "thành phố Hà Tĩnh",
+        "thị xã Hồng Lĩnh",
+        "thị xã Kỳ Anh",
+        "huyện Can Lộc",
+        "huyện Cẩm Xuyên",
+        "huyện Đức Thọ",
+        "huyện Hương Khê",
+        "huyện Hương Sơn",
+        "huyện Kỳ Anh",
+        "huyện Lộc Hà",
+        "huyện Nghi Xuân",
+        "huyện Thạch Hà",
+        "huyện Vũ Quang",
+      ],
+      quangbinh: [
+        "thành phố Đồng Hới",
+        "thị xã Ba Đồn",
+        "huyện Bố Trạch",
+        "huyện Lệ Thủy",
+        "huyện Minh Hóa",
+        "huyện Quảng Ninh",
+        "huyện Quảng Trạch",
+        "huyện Tuyên Hóa",
+      ],
+      quangtri: ["Quận 1", "Quận 2", "Quận 7", "Thủ Đức"],
+      thuathienhue: [
+        "quận Phú Xuân",
+        "quận Thuận Hóa",
+        "thị xã Hương Thủy",
+        "thị xã Hương Trà",
+        "thị xã Phong Điền",
+        "huyện A Lưới",
+        "huyện Phú Lộc",
+        "huyện Phú Vang",
+        "huyện Quảng Điền",
+      ],
+      danang: [
+        "quận Cẩm Lệ",
+        "quận Hải Châu",
+        "quận Liên Chiểu",
+        "Quận Ngũ Hành Sơn",
+        "Quận Sơn Trà",
+        "Quận Thanh Khê",
+        "huyện Hòa Vang",
+      ],
+      quangnam: [
+        "Thành phố Hội An",
+        "thành phố Tam Kỳ",
+        "Thị xã Điện Bàn",
+        "huyện Bắc Trà My",
+        "huyện Đại Lộc",
+        "huyện Đông Giang",
+        "huyện Duy Xuyên",
+        "huyện Hiệp Đức",
+        "huyện Nam Giang",
+        "huyện Nam Trà My",
+        "huyện Nông Sơn",
+        "huyện Núi Thành",
+        "huyện Phú Ninh",
+        "huyện Phước Sơn",
+        "huyện Quế Sơn",
+        "huyện Tây Giang",
+        "huyện Thăng Bình",
+        "huyện Tiên Phước",
+      ],
+      quangngai: [
+        " thành phố Quảng Ngãi",
+        "thị xã Đức Phổ",
+        "huyện Ba Tơ",
+        "huyện Bình Sơn",
+        "huyện Lý Sơn",
+        "huyện Minh Long",
+        "huyện Mộ Đức",
+        "huyện Nghĩa Hành",
+        "huyện Sơn Hà",
+        "huyện Sơn Tây",
+        "huyện Sơn Tịnh",
+        " huyện Trà Bồng",
+        " huyện Tư Nghĩa",
+      ],
+      binhdinh: [
+        "thành phố Quy Nhơn",
+        "thị xã An Nhơn",
+        "thị xã Hoài Nhơn",
+        "huyện An Lão",
+        "huyện Hoài Ân",
+        "huyện Phù Cát",
+        "huyện Phú Mỹ",
+        "huyện Tây Sơn",
+        "huyện Tuy Phước",
+        "huyện Vân Canh",
+        "huyện Vĩnh Thạnh",
+      ],
+      phuyen: [
+        "thành phố Tuy Hoà",
+        "thị xã Đông Hòa",
+        "thị xã Sông Cầu",
+        "huyện Đồng Xuân",
+        "huyện Phú Hòa",
+        "huyện Sơn Hòa",
+        "huyện Sông Hinh",
+        "huyện Tây Hoà",
+        "huyện Tuy An",
+      ],
+      khanhhoa: [
+        "Thành phố Nha Trang",
+        "Thành phố Cam Ranh",
+        "Thị xã Ninh Hòa",
+        "Huyện Cam Lâm",
+        "Huyện Diên Khánh",
+        "Huyện Khánh Sơn",
+        "Huyện Khánh Vĩnh",
+        "Huyện Trường Sa",
+        "Huyện Vạn Ninh",
+      ],
+      ninhthuan: [
+        "Thành phố Phan Rang – Tháp Chàm",
+        "Huyện Bác Ái",
+        "huyện Ninh Hải",
+        "huyện Ninh Phước",
+        "huyện Ninh Sơn",
+        "huyện Thuận Bắc",
+        "huyện Thuận Nam",
+      ],
+      binhthuan: [
+        "thành phố Phan Thiết",
+        "thị xã La Gi",
+        "huyện Bắc Bình",
+        "huyện Đức Linh",
+        "huyện Hàm Tân",
+        "Hàm Thuận Bắc",
+        "Hàm Thuận Nam",
+        "huyện Phú Quý",
+        "huyện Tánh Linh",
+        "huyện Tuy Phong",
+      ],
+      kontum: [
+        "thành phố Kon Tum",
+        "huyện Đăk Glei",
+        "huyện Đăk Hà",
+        "huyện Đăk Tô",
+        "huyện Ia H'Drai",
+        "huyện Kon Plông",
+        "huyện Kon Rẫy",
+        "huyện Ngọc Hồi",
+        "huyện Sa Thầy",
+        "huyện Tu Mơ Rông",
+      ],
+      gialai: [
+        "thành phố Pleiku",
+        "thị xã An Khê",
+        "thị xã Ayun Pa",
+        "Thuyện Chư Păh",
+        "huyện Chư Prông",
+        "huyện Chư Pưh",
+        "huyện Chư Sê",
+        "uyện Đăk Đoa",
+        "huyện Đăk Pơ",
+        "huyện Đức Cơ",
+        "huyện Ia Grai",
+        "huyện Ia Pa",
+        " huyện Kbang",
+        "huyện Kông Chro",
+        "huyện Krông Pa",
+        "huyện Mang Yang",
+        "huyện Phú Thiện",
+      ],
+      daklak: [
+        "thành phố Buôn Ma Thuột",
+        "thị xã Buôn Hồ",
+        "huyện Buôn Đôn",
+        "huyện Cư Kuin",
+        "huyện Cư M'gar",
+        "huyện Ea H'leo",
+        "huyện Ea Kar",
+        "huyện Ea Súp",
+        "huyện Krông Ana",
+        "huyện Krông Bông",
+        "huyện Krông Búk",
+        "huyện Krông Năng",
+        "huyện Krông Pắc",
+        "huyện Lắk",
+        "huyện M'Drắk",
+      ],
+      daknong: [
+        "TP Gia Nghĩa",
+        "Huyện Cư Jút",
+        "Huyện Đắk Glong",
+        "Huyện Đắk Mil",
+        "Huyện Đắk Rlấp",
+        "Huyện Đắk Song",
+        "Huyện Krông Nô",
+        "Huyện Tuy Đức",
+      ],
+      lamdong: [
+        " thành phố Đà Lạt",
+        "thành phố Bảo Lộc",
+        "huyện Bảo Lâm",
+        "huyện Cát Tiên",
+        "huyện Di Linh",
+        "huyện Đạ Huoai",
+        "huyện Đạ Tẻh",
+        "huyện Đam Rông",
+        "huyện Đơn Dương",
+        "huyện Đức Trọng",
+        "huyện Lạc Dương",
+        "huyện Lâm Hà",
+      ],
+      // Nam Bộ
+      hochiminh: [
+        "Thành phố Thủ Đức",
+        "Quận 1",
+        "Quận 3",
+        "Quận 4",
+        "Quận 5",
+        "Quận 6",
+        "Quận 7",
+        "Quận 8",
+        "Quận 10",
+        "Quận 11",
+        "Quận 12",
+        "Quận Bình Tân",
+        "Quận Bình Thạnh",
+        "Quận Gò Vấp",
+        "Quận Phú Nhuận",
+        "Quận Tân Bình",
+        "Quận Tân Phú",
+        "Huyện Bình Chánh",
+        "Huyện Cần Giờ",
+        "Huyện Củ Chi",
+        "Huyện Hóc Môn",
+        "Huyện Nhà Bè",
+      ],
+      bariavungtau: [
+        "thành phố Bà Rịa",
+        "thành phố Vũng Tàu",
+        "thị xã Phú Mỹ",
+        "huyện Châu Đức",
+        "huyện Côn Đảo",
+        "huyện Đất Đỏ",
+        "huyện Long Điền",
+        "huyện Xuyên Mộc",
+      ],
+      binhduong: [
+        " thành phố Dĩ An",
+        "thành phố Tân Uyên",
+        "thành phố Thủ Dầu Một",
+        "thành phố Thuận An",
+        "thị xã Bến Cát",
+        "huyện Bàu Bàng",
+        "huyện Bắc Tân Uyên",
+        "huyện Dầu Tiếng",
+        "huyện Phú Giáo",
+      ],
+      binhphuoc: [
+        "thành phố Đồng Xoài",
+        "thị xã Bình Long",
+        "thị xã Chơn Thành",
+        "thị xã Phước Long",
+        "huyện Bù Đăng",
+        "huyện Bù Đốp",
+        "huyện Bù Gia Mập",
+        "huyện Đồng Phú",
+        "huyện Hớn Quản",
+        "huyện Lộc Ninh",
+        "huyện Phú Riềng",
+      ],
+      dongnai: [
+        "thành phố Biên Hòa",
+        "thành phố Long Khánh",
+        "huyện Cẩm Mỹ",
+        "huyện Định Quán",
+        "huyện Long Thành",
+        "huyện Nhơn Trạch",
+        "huyện Tân Phú",
+        "huyện Thống Nhất",
+        "huyện Trảng Bom",
+        "huyện Vĩnh Cửu",
+        "huyện Xuân Lộc",
+      ],
+      tayninh: [
+        "thành phố Tây Ninh",
+        "thị xã Hoà Thành",
+        "thị xã Trảng Bàng",
+        "huyện Bến Cầu",
+        "huyện Châu Thành",
+        "huyện Dương Minh Châu",
+        "huyện Gò Dầu",
+        "huyện Tân Biên",
+        "huyện Tân Châu",
+      ],
+      angiang: [
+        "thành phố Long Xuyên",
+        " thành phố Châu Đốc",
+        "thị xã Tân Châu",
+        "thị xã Tịnh Biên",
+        "huyện An Phú",
+        "huyện Châu Phú",
+        " huyện Châu Thành",
+        "huyện Chợ Mới",
+        "huyện Phú Tân",
+        "huyện Thoại Sơn",
+        "huyện Tri Tôn",
+      ],
+      baclieu: [
+        "thành phố Bạc Liêu",
+        "thị xã Giá Rai",
+        "huyện Đông Hải",
+        "huyện Hoà Bình",
+        "huyện Hồng Dân",
+        "huyện Phước Long",
+        "huyện Vĩnh Lợi",
+      ],
+      bentre: [
+        "thành phố Bến Tre",
+        "huyện Ba Tri",
+        "huyện Bình Đại",
+        "huyện Châu Thành",
+        " huyện Chợ Lách",
+        "huyện Giồng Trôm",
+        "huyện Mỏ Cày Bắc",
+        "huyện Mỏ Cày Nam",
+        "huyện Thạnh Phú",
+      ],
+      camau: [
+        "thành phố Cà Mau",
+        "huyện Cái Nước",
+        "huyện Đầm Dơi",
+        "huyện Năm Căn",
+        "huyện Ngọc Hiển",
+        "huyện Phú Tân",
+        "huyện Thới Bình",
+        " huyện Trần Văn Thời",
+        "huyện U Minh",
+      ],
+      cantho: [
+        "quận Bình Thuỷ",
+        "quận Cái Răng",
+        "quận Ninh Kiều",
+        "quận Ô Môn",
+        "quận Thốt Nốt",
+        "huyện Cờ Đỏ",
+        "huyện Phong Điền",
+        "huyện Thới Lai",
+        "huyện Vĩnh Thạnh",
+      ],
+      dongthap: [
+        "Thành phố Cao Lãnh",
+        "thành phố Hồng Ngự",
+        "thành phố Sa Đéc",
+        "huyện Cao Lãnh",
+        "huyện Châu Thành",
+        "huyện Hồng Ngự",
+        "huyện Lai Vung",
+        " huyện Lấp Vò",
+        "huyện Tam Nông",
+        "huyện Tân Hồng",
+        "huyện Thanh Bình",
+        "huyện Tháp Mười",
+      ],
+      haugiang: [
+        "thành phố Ngã Bảy",
+        "thành phố Vị Thanh",
+        "Thị xã Long Mỹ",
+        "huyện Châu Thành",
+        "huyện Châu Thành A",
+        "huyện Long Mỹ",
+        "huyện Phụng Hiệp",
+        "huyện Vị Thuỷ",
+      ],
+      kiengiang: [
+        "Thành phố Hà Tiên",
+        "Thành phố Phú Quốc",
+        "thành phố Rạch Giá",
+        "huyện An Biên",
+        "huyện An Minh",
+        "huyện Châu Thành",
+        "huyện Giang Thành",
+        "Huyện Giồng Riềng",
+        "huyện Gò Quao",
+        "huyện Hòn Đất",
+        "huyện Kiên Hải",
+        " huyện Kiên Lương",
+        "huyện Tân Hiệp",
+        "huyện U Minh Thượng",
+        "huyện Vĩnh Thuận",
+      ],
+      longan: [
+        "Thành phố Tân An",
+        "Thị xã Kiên Tường",
+        "Huyện Bến Lức",
+        "huyện Cần Đước",
+        "huyện Cần Giuộc",
+        "huyện Châu Thành",
+        "huyện Đức Hoà",
+        "huyện Đức Huệ",
+        "huyện Mộc Hoá",
+        "huyện Tân Hưng",
+        "huyện Tân Thạnh",
+        "huyện Tân Trụ",
+        "huyện Thạch Hoá",
+        "huyện Thủ Thừa",
+        "huyện Vĩnh Hưng",
+      ],
+      soctrang: [
+        "thành phố Sóc Trăng",
+        "thị xã Ngã Năm",
+        "thị xã Vĩnh Châu",
+        "huyện Châu Thành",
+        "huyện Cù Lao Dung",
+        "huyện Kế Sách",
+        "huyện Long Phú",
+        "huyện Mỹ Tú",
+        " huyện Mỹ Xuyên",
+        "huyện Thạnh Trị",
+        "huyện Trần Đề",
+      ],
+      tiengiang: [
+        "Thành phố Mỹ Tho",
+        "Thị xã Cai Lậy",
+        " Thị xã Gò Công",
+        "huyện Cái Bè",
+        "huyện Cai Lậy",
+        "huyện Châu Thành",
+        "huyện Chợ Gạo",
+        "huyện Gò Công Đông",
+        "huyện Gò Công Tây",
+        "huyện Tân Phú Đông",
+        "huyện Tân Phước",
+      ],
+      travinh: [
+        "thành phố Trà Vinh",
+        "thị xã Duyên Hải",
+        "huyện Càng Long",
+        "huyện Cầu Kè",
+        "huyện Cầu Ngang",
+        "huyện Châu Thành",
+        "huyện Duyên Hải",
+        " huyện Tiểu Cần",
+        "huyện Trà Cú",
+      ],
+      vinhlong: [
+        "thành phố Vĩnh Long",
+        "thị xã Bình Minh",
+        "huyện Bình Tân",
+        "Thủ Đức",
+        " huyện Long Hồ",
+        "huyện Mang Thít",
+        "huyện Tam Bình",
+        "huyện Trà Ôn",
+      ],
+    };
+
+    const wards = {
+      //Bắc Bộ
+      // Hà Nội
+      "Ba Đình": [
+        "Phường Cống Vị",
+        "Phường Điện Biên",
+        "Phường Đội Cấn",
+        "Phường Giảng Võ",
+        "Phường Kim Mã",
+        "Phường Liễu Giai",
+        "Phường Ngọc Hà",
+        "Phường Nguyễn Trung Trực",
+        "Phường Quán Thánh",
+        "Phường Trúc Bạch",
+      ],
+      "Hoàn Kiếm": [
+        "Phường Chương Dương",
+        "Phường Cửa Đông",
+        "Phường Cửa Nam",
+        "Phường Đồng Xuân",
+        "Phường Hàng Bạc",
+        "Phường Hàng Bài",
+        "Phường Hàng Bồ",
+        "Phường Hàng Bông",
+        "Phường Hàng Buồm",
+        "Phường Hàng Đào",
+        "Phường Hàng Gai",
+        "Phường Hàng Mã",
+      ],
+      "Cầu Giấy": [
+        "Phường Dịch Vọng",
+        "Phường Dịch Vọng Hậu",
+        "Phường Mai Dịch",
+        "Phường Nghĩa Đô",
+        "Phường Nghĩa Tân",
+        "Phường Quan Hoa",
+        "Phường Trung Hòa",
+      ],
+      "Hai Bà Trưng": [
+        "Phường Bách Khoa",
+        "Phường Đồng Tâm",
+        "Phường Lê Đại Hành",
+        "Phường Phạm Đình Hổ",
+        "Phường Phố Huế",
+        "Phường Thanh Nhàn",
+        "Phường Trương Định",
+      ],
+      "Hoàng Mai": [
+        "Phường Đại Kim",
+        "Phường Định Công",
+        "Phường Giáp Bát",
+        "Phường Hoàng Văn Thụ",
+        "Phường Tân Mai",
+        "Phường Tương Mai",
+        "Phường Vĩnh Hưng",
+      ],
+      "Tây Hồ": [
+        "Phường Bưởi",
+        "Phường Nhật Tân",
+        "Phường Phú Thượng",
+        "Phường Quảng An ",
+        "Phường Thụy Khuê",
+        "Phường Tứ Liên",
+        "Phường Xuân La",
+        "Phường Yên Phụ",
+      ],
+      "Thanh Xuân": [
+        "Phường Hạ Đình",
+        "Phường Khương Đình",
+        "Phường Khương Mai",
+        "Phường Khương Trung",
+        "Phường Nhân Chính",
+        "Phường Thanh Xuân Nam",
+        "Phường Thanh Xuân Trung",
+      ],
+      "Ba Vì": [
+        "Phường Ba Trại",
+        "Phường Cẩm Lĩnh",
+        "Phường Châu Sơn",
+        "Xã Đông Quang",
+        "Xã Khánh Thượng",
+        "Xã Phong Vân",
+        "Xã Phú Phương",
+        "Xã Sơn Đà",
+      ],
+      "Chương Mỹ": [
+        "Thị trấn Chúc Sơn",
+        "Xã Đông Phương Yên",
+        "Xã Hòa Chính",
+        "Xã Hợp Đồng",
+        "Xã Nam Phương Tiến",
+        "Xã Phú Nam An",
+        "Xã Thủy Xuân Tiên",
+        "Xã Trường Yên",
+      ],
+      "Đan Phượng": [
+        "Xã Đồng Tháp",
+        "Xã Hạ Mỗ",
+        "Xã Song Phượng",
+        "Xã Tân Lập",
+        "Xã Thọ An",
+        "Xã Thọ Xuân",
+        "Xã Thượng Mỗ",
+        "Xã Trung Châu",
+      ],
+      "Đông Anh": [
+        "Thị trấn Đông Anh",
+        "Xã Đại Mạch",
+        "Xã Liên Hà",
+        "Xã Mai Lâm",
+        "Xã Nguyên Khê",
+        "Xã Thụy Lâm",
+        "Xã Tiên Dương",
+        "Xã Việt Hùng",
+      ],
+      "Gia Lâm": [
+        "Thị trấn Trâu Quỳ",
+        "Thị trấn Yên Viên",
+        "Xã Lệ Chi",
+        "Xã Đông Dư",
+        "Xã Yên Thường",
+        "Xã Yên Viên",
+        "Xã Đình Xuyên",
+        "Xã Trung Mầu",
+      ],
+      "Mê Linh": [
+        "Thị trấn Chi Đông",
+        "Xã Hoàng Kim",
+        "Xã Tiền Phong",
+        "Xã Tiến Thắng",
+        "Xã Tiến Thịnh",
+      ],
+      "Mỹ Đức": [
+        "Xã An Tiến",
+        "Xã Đồng Tâm",
+        "Xã Hồng Sơn",
+        "Xã Hợp Thanh",
+        "Xã Mỹ Thành",
+        "Xã Phù Lưu Tế",
+      ],
+      "Phú Xuyên": [
+        "Thị trấn Phú Minh",
+        "Xã Hồng Thái",
+        "Xã Nam Phong",
+        "Xã Nam Triều",
+        "Xã Văn Hoàng",
+        "Xã Tri Thủy",
+      ],
+      "Phúc Thọ": [
+        "Xã Hát Môn",
+        "Xã Phụng Thượng",
+        "Xã Sen Phương",
+        "Xã Trạch Mỹ Lộc",
+        "Xã Vân Hà",
+        "Xã Vân Nam",
+        "Xã Võng Xuyên",
+      ],
+      "Quốc Oai": [
+        "Phường Hòa Cường",
+        "Phường Bình Thuận",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+      ],
+      "Sóc Sơn": [
+        "Phường Hòa Cường",
+        "Phường Bình Thuận",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+        "Phường Đa Kao",
+      ],
+      // bắc ninh
+      "Tp. Bắc Ninh": [
+        "Phường Đại Phúc",
+        "Phường Đáp Cầu",
+        "Phường Khắc Niệm",
+        "Phường Ninh Xá",
+        "Phường Phong Khê",
+        "Phường Suối Hoa",
+      ],
+      "TP.Từ Sơn": [
+        "Phường Châu Khê",
+        "Phường Đình Bảng",
+        "Phường Đông Ngàn",
+        "Phường Đồng Kỵ",
+        "Phường Đồng Nguyên",
+        "Phường Hương Mạc",
+      ],
+      "Thị xã Quế Võ": [
+        "Phường Bằng An",
+        "Phường Cách Bi",
+        "Phường Đại Xuân",
+        "Phường Nhân Hòa",
+        "Phường Phố Mới",
+        "Xã Châu Phong",
+      ],
+      "Thị xã Thuận Thành": [
+        "Phường An Bình",
+        "Phường Thanh Khương",
+        "Phường Trạm Lộ",
+        "Phường Trí Quả",
+        "Phường Xuân Lâm ",
+        "Xã Hoài Thượng",
+      ],
+      "Huyện Yên Phong": [
+        "Thị trấn Chờ",
+        "Xã Đông Thọ",
+        "Xã Đông Tiến",
+        "Xã Long Châu",
+        "Xã Tam Giang",
+        "Xã Trung Nghĩa",
+      ],
+      "huyện Tiên Du": [
+        "Thị trấn Lim",
+        "Xã Minh Đạo",
+        "Xã Hiên Vân",
+        "Xã Lạc Vệ",
+        "Xã Việt Đoàn",
+        "Xã Tri Phương",
+      ],
+      "Huyện Gia Bình": [
+        "Thị trấn Gia Bình",
+        "Xã Bình Dương",
+        "Xã Đại Bái",
+        "Xã Giang Sơn",
+        "Xã Lãng Ngâm",
+        "Xã Nhân Thắng",
+      ],
+      "huyện Lương Tài": [
+        "Thị trấn Phú Minh",
+        "Xã Hồng Thái",
+        "Xã Nam Phong",
+        "Xã Nam Triều",
+        "Xã Văn Hoàng",
+        "Xã Tri Thủy",
+      ],
+      //Hà Nam
+      "Thành phố Phủ Lý": [
+        "Phường Châu Sơn",
+        "Phường Hai Bà Trưng",
+        "Phường Lê Hồng Phong",
+        "Phường Lương Khánh Thiện",
+        "Phường Trần Hưng Đạo ",
+        "Xã Đinh Xá",
+        "Xã Trịnh Xá",
+      ],
+      "thị xã Duy Tiên": [
+        "Phường Bạch Thượng",
+        "Phường Châu Giang",
+        "Phường Duy Hải",
+        "Phường Duy Minh",
+        "Phường Đồng Văn",
+        "Xã Chuyên Ngoại",
+        "Xã Mộc Bắc",
+        "Xã Tiên Ngoại",
+      ],
+      "Huyện Bình Lục": [
+        "Thị trấn Bình Mỹ",
+        "Xã An Đổ",
+        "Xã An Ninh",
+        "Xã Bồ Đề",
+        "Xã Bối Cầu",
+      ],
+      "huyện Kim Bảng": [
+        "Thị trấn Ba Sao",
+        "Xã Đại Cương",
+        "Xã Đồng Hóa",
+        "Xã Khả Phong",
+        "Xã Nguyễn Uý",
+      ],
+      "huyện Lý Nhân": [
+        "Thị trấn Vĩnh Trụ",
+        "Xã Bắc Lý",
+        "Xã Chân Lý",
+        "Xã Chính Lý",
+        "Xã Hòa Hậu",
+      ],
+      "huyện Thanh Liêm": [
+        "Thị trấn Tân Thanh",
+        "Xã Thanh Hương",
+        "Xã Thanh Tâm",
+        "Xã Thanh Tân",
+        "Xã Thanh Thủy",
+      ],
+      // hải phòng
+      "quận Đồ Sơn": [
+        "Phường Bàng La",
+        "Phường Hải Sơn",
+        "Phường Hợp Đức",
+        "Phường Minh Đức",
+        "Phường Vạn Hương",
+      ],
+      "quận Dương Kinh": [
+        "Phường Anh Dũng",
+        "Phường Đa Phúc",
+        "Phường Hải Thành",
+        "Phường Hoà Nghĩa",
+        "Phường Tân Thành",
+      ],
+      "quận Hải An": [
+        "Phường Cát Bi",
+        "Phường Đằng Lâm",
+        "Phường Đằng Hải",
+        "Phường Đông Hải 1",
+        "Phường Đông Hải 2",
+      ],
+      "quận Hồng Bàng": [
+        "Phường Hạ Lý",
+        "Phường Hoàng Văn Thụ",
+        "Phường Hùng Vương",
+        "Phường Minh Khai",
+        "Phường Phan Bội Châu",
+      ],
+      "quận Kiến An": [
+        "Phường Bắc Sơn",
+        "Phường Đồng Hòa",
+        "Phường Lãm Hà",
+        "Phường Trần Thành Ngọ",
+        "Phường Tràng Minh",
+      ],
+      "quận Lê Chân": [
+        "Phường An Biên",
+        "Phường An Dương",
+        "Phường Đông Hải",
+        "Phường Dư Hàng",
+        "Phường Trần Nguyên Hãn",
+        "Phường Kênh Dương",
+      ],
+      "quận Ngô Quyền": [
+        "Phường Cầu Đất",
+        "Phường Đằng Giang",
+        "Phường Đồng Quốc Bình",
+        "Phường Gia Viên",
+        "Phường Lạc Viên",
+      ],
+      "huyện An Dương": [
+        "Thị trấn An Dương",
+        "Xã An Đồng",
+        "Xã An Hòa",
+        "Xã An Hưng",
+        "Xã Đặng Cương",
+        "Xã Hồng Phong",
+      ],
+      "huyện An Lão": [
+        "Thị trấn An Lão",
+        "Thị trấn Trường Sơn",
+        "Xã An Thọ",
+        "Xã Trường Thành",
+        "Xã Trường Thọ",
+      ],
+      "huyện Cát Hải": [
+        "Thị trấn Cát Bà",
+        "Thị trấn Cát Hải",
+        "Xã Đồng Bài",
+        "Xã Trân Châu",
+        "Xã Văn Phong",
+      ],
+      "huyện Kiến Thụy": [
+        "Thị trấn Núi Đối",
+        "Xã Đại Đồng",
+        "Xã Đại Hà",
+        "Xã Đại Hợp",
+        "Xã Đông Phương",
+        "Xã Du Lễ",
+        "Xã Kiến Quốc",
+      ],
+      "huyện Thủy Nguyên": [
+        "Thị trấn Núi Đèo",
+        "Thị trấn Minh Đức",
+        "Xã An Lư",
+        "Xã An Sơn",
+        "Xã Cao Nhân",
+        "Xã Dương Quan",
+      ],
+      "huyện Tiên Lãng": [
+        "Thị trấn Tiên Lãng",
+        "Xã Bắc Hưng",
+        "Xã Bạch Đằng",
+        "Xã Cấp Tiến",
+        "Xã Đoàn Lập",
+        "Xã Kiến Thiết",
+      ],
+      "huyện Vĩnh Bảo": [
+        "Thị trấn Vĩnh Bảo",
+        "Xã An Hòa",
+        "Xã Cao Minh",
+        "Xã Cổ Am",
+        "Xã Cộng Hiền",
+        "Xã Hiệp Hòa",
+        "Xã Hòa Bình",
+      ],
+      // hải dương
+      "thành phố Hải Dương": [
+        "Phường Ái Quốc",
+        "Phường Bình Hàn",
+        "Phường Cẩm Thượng",
+        "Phường Lê Thanh Nghị",
+        "Phường Nguyễn Trãi",
+        "Phường Phạm Ngũ Lão",
+        "Xã Liên Hồng",
+      ],
+      "thành phố Chí Linh": [
+        "Phường An Lạc",
+        "Phường Bến Tắm",
+        "Phường Chí Minh",
+        "Phường Thái Học",
+        "Phường Văn An",
+        "Xã Hoàng Hoa Thám",
+      ],
+      "thị xã Kinh Môn": [
+        "Phường An Lưu",
+        "Phường An Phụ",
+        "Phường An Sinh",
+        "Phường Duy Tân",
+        "Phường Phạm Thái",
+        "Xã Quang Thành",
+      ],
+      "huyện Bình Giang": [
+        "Thị trấn Kẻ Sặt",
+        "Xã Bình Minh",
+        "Xã Bình Xuyên",
+        "Xã Cổ Bì",
+        "Xã Hùng Thắng",
+        "Xã Long Xuyên",
+        "Xã Vĩnh Hưng",
+      ],
+      "huyện Cẩm Giang": [
+        "Thị trấn Lai Cách",
+        "Thị trấn Cẩm Giang",
+        "Xã Cẩm Điền",
+        "Xã Cẩm Đoài",
+        "Xã Cẩm Đông",
+        "Xã Cẩm Hưng",
+      ],
+      "huyện Gia Lộc": [
+        "Thị trấn Gia Lộc",
+        "Xã Đoàn Thượng",
+        "Xã Đồng Quang",
+        "Xã Đức Xương",
+        "Xã Gia Khánh",
+      ],
+      "huyện Kim Thành": [
+        "Thị trấn Phú Thái",
+        "Xã Bình Dân",
+        "Xã Cổ Dũng",
+        "Xã Cộng Hòa",
+        "Xã Kim Anh",
+      ],
+      "huyện Nam Sách": [
+        "Thị trấn Nam Sách",
+        "Xã An Bình",
+        "Xã An Lâm",
+        "Xã Cộng Hòa",
+        "Xã Đồng Lạc",
+        "Xã Hồng Phong",
+      ],
+      "huyện Ninh Giang": [
+        "Thị trấn Ninh Giang",
+        "Xã An Đức",
+        "Xã Đông Xuyên",
+        "Xã Hiệp Lực",
+        "Xã Hồng Đức",
+      ],
+      "huyện Thanh Hà": [
+        "Thị trấn Thanh Hà",
+        "Xã An Phượng",
+        "Xã Cẩm Chế",
+        "Xã Tân An",
+        "Xã Tân Việt",
+        "Xã Thanh Cường",
+      ],
+      "huyện Thanh Miện": [
+        "Thị trấn Thanh Miện",
+        "Xã Cao Thắng",
+        "Xã Chi Lăng Bắc",
+        "Xã Chi Lăng Nam",
+        "Xã Đoàn Kết",
+        "Xã Hồng Phong",
+      ],
+      "huyện Tứ Kỳ": [
+        "Xã Văn Tố",
+        "Xã Tiên Động",
+        "Xã Quang Trung",
+        "Xã Quang Phục",
+        "Xã Quảng Nghiệp",
+        "Xã Phượng Kỳ",
+      ],
+      //hưng yên
+      "thành phố Hưng Yên": [
+        "Phương An Tảo",
+        "Phương Hiến Nam",
+        "Phương Hồng Châu",
+        "Phương Lam Sơn",
+        "Phương Lê Lợi",
+      ],
+      "thị xã Mỹ Hào": [
+        "Phường Bạch Sam",
+        "Phường Bần Yên Nhân",
+        "Phường Dị Sử",
+        "Phường Phan Đình Phùng",
+        "Phường Phùng Chí Kiên ",
+      ],
+      "huyện Ân Thi": [
+        "Thị trấn Ân Thi",
+        "Xã Bắc Sơn",
+        "Xã Bãi Sậy",
+        "Xã Cẩm Ninh",
+        "Xã Hoàng Hoa Thám",
+        "Xã Xuân Trúc",
+      ],
+      "huyện Khoái Châu": [
+        "Thị trấn Khoái Châu",
+        "Xã An Vĩ",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+      "huyện Kim Động": [
+        "Thị trấn Lương Bằng",
+        "Xã Phạm Ngũ Lão",
+        "Xã Cổ Dũng",
+        "Xã Cộng Hòa",
+        "Xã Kim Anh",
+      ],
+      "huyện Phù Cừ": [
+        "Thị trấn Trần Cao",
+        "Xã Minh Hoàng",
+        "Xã Minh Tân",
+        "Xã Nguyên Hòa",
+        "Xã Phan Sào Nam",
+      ],
+      "huyện Tiên Lữ": [
+        "Thị trấn Vương",
+        "Xã An Viên",
+        "Xã Cương Chính",
+        "Xã Dị Chế",
+        "Xã Đức Thắng",
+        "Xã Trung Dũng",
+      ],
+      "huyện Văn Giang": [
+        "Thị trấn Văn Giang",
+        "Xã Cửu Cao",
+        "Xã Liên Nghĩa",
+        "Xã Long Hưng",
+        "Xã Mễ Sở",
+      ],
+      "huyện Văn Lâm": [
+        "Thị trấn Như Quỳnh",
+        "Xã Chỉ Đạo",
+        "Xã Đại Đồng",
+        "Xã Lạc Hồng",
+        "Xã Lương Tài",
+        "Xã Tân Quang",
+      ],
+      "huyện Yên Mỹ": [
+        "Thị trấn Yên Kỹ",
+        "Xã Đồng Than",
+        "Xã Giai Phạm",
+        "Xã Hoàn Long",
+        "Xã Lý Thường Kiệt",
+      ],
+
+      //nam định
+      "thành phố Nam Định": [
+        "Phường Bà Triệu",
+        "Phường Cửa Bắc",
+        "Phường Cửa Nam",
+        "Phường Mỹ Xá",
+        "Xã Nam Vân",
+      ],
+      "huyện Giao Thủy": [
+        "Thị trấn Ngô Đồng",
+        "Thị trấn Quất Lâm",
+        "Xã Bạch Long",
+        "Xã Bình Hòa",
+        "Xã Giao An",
+      ],
+      "huyện Hải Hậu": [
+        "Thị trấn Yên Định",
+        "Thị trấn Cồn",
+        "Thị trấn Thịnh Long",
+        "Xã Hải Phương",
+        "Xã Hải Hòa",
+      ],
+      "huyện Mỹ Lộc": [
+        "Thị trấn Mỹ Lộc",
+        "Xã Mỹ Hà",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+      "huyện Nam Trực": [
+        "Thị trấn Nam Giang",
+        "Xã An Vĩ",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+      "huyện Nghĩa Hưng": [
+        "Thị trấn Khoái Châu",
+        "Xã An Vĩ",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+      "huyện Trực Ninh": [
+        "Thị trấn Khoái Châu",
+        "Xã An Vĩ",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+      "huyện Vụ Bản": [
+        "Thị trấn Khoái Châu",
+        "Xã An Vĩ",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+      "huyện Xuân Trường": [
+        "Thị trấn Khoái Châu",
+        "Xã An Vĩ",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+      "huyện Ý Yên": [
+        "Thị trấn Khoái Châu",
+        "Xã An Vĩ",
+        "Xã Bình Kiều",
+        "Xã Bình Minh",
+        "Xã Kim Anh",
+      ],
+    };
+    document.getElementById("city").addEventListener("change", function () {
+      const city = this.value;
+      const districtSelect = document.getElementById("district");
+      districtSelect.innerHTML = `<option value="" disabled selected>Chọn Quận/Huyện</option>`;
+      document.getElementById(
+        "ward"
+      ).innerHTML = `<option value="" disabled selected>Chọn Phường/Xã</option>`;
+
+      if (districts[city]) {
+        districts[city].forEach((district) => {
+          const option = document.createElement("option");
+          option.value = district;
+          option.textContent = district;
+          districtSelect.appendChild(option);
+        });
+      }
+    });
+
+    document.getElementById("district").addEventListener("change", function () {
+      const district = this.value;
+      const wardSelect = document.getElementById("ward");
+      wardSelect.innerHTML = `<option value="" disabled selected>Chọn Phường/Xã</option>`;
+
+      if (wards[district]) {
+        wards[district].forEach((ward) => {
+          const option = document.createElement("option");
+          option.value = ward;
+          option.textContent = ward;
+          wardSelect.appendChild(option);
+        });
+      }
+    });
+  </script>
+</html>

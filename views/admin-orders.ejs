@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý đơn hàng</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #fff;
+            text-align: left;
+        }
+
+        table th {
+            background-color: #007bff;
+        }
+
+        .back-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 1rem;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quản lý đơn hàng</h1>
+        <% if (transactions.length > 0) { %>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ngày</th>
+                    <th>Email Khách Hàng</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái</th>
+                    <th>Cập nhật</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% transactions.forEach(transaction => { %>
+                <tr>
+                    <td><%= new Date(transaction.createdAt).toLocaleString('vi-VN') %></td>
+                    <td><%= transaction.userId.email %></td>
+                    <td><%= transaction.total.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) %></td>
+                    <td>
+                        <select onchange="updateStatus('<%= transaction._id %>', this.value)">
+                            <option value="Chờ xác nhận" <%= transaction.status === "Chờ xác nhận" ? "selected" : "" %>>Chờ xác nhận</option>
+                            <option value="Đã xác nhận" <%= transaction.status === "Đã xác nhận" ? "selected" : "" %>>Đã xác nhận</option>
+                            <option value="Đang giao" <%= transaction.status === "Đang giao" ? "selected" : "" %>>Đang giao</option>
+                            <option value="Đã huỷ" <%= transaction.status === "Đã huỷ" ? "selected" : "" %>>Đã huỷ</option>
+                            <option value="Đã giao" <%= transaction.status === "Đã giao" ? "selected" : "" %>>Đã giao</option>
+                        </select>
+                    </td>
+                </tr>
+                <% }) %>
+            </tbody>
+        </table>
+        <% } else { %>
+        <p>Không có đơn hàng nào.</p>
+        <% } %>
+
+        <a href="/admin/dashboard" class="back-btn">Trở về Dashboard</a>
+    </div>
+
+    <script>
+        function updateStatus(transactionId, status) {
+            fetch(`/transactions/admin/update-status/${transactionId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ status })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message))
+            .catch(error => console.error("Lỗi cập nhật trạng thái:", error));
+        }
+    </script>
+</body>
+</html>
