@@ -1,0 +1,54 @@
+[{
+  "_id": {
+    "$oid": "67aff26d375c45fafc600d65"
+  },
+  "username": "thien",
+  "email": "truongbui789654@gmail.com",
+  "password": "$2a$10$9HxDkvDyex.EkpWVMDnrTeiQJGKycy42fAaN8Fgaapdrv.Gr.OiKq",
+  "age": 21,
+  "role": "user",
+  "createdAt": {
+    "$date": "2025-02-15T01:48:29.805Z"
+  },
+  "updatedAt": {
+    "$date": "2025-02-15T17:01:58.839Z"
+  },
+  "__v": 0,
+  "resetPasswordExpires": {
+    "$date": "2025-02-15T02:54:19.811Z"
+  },
+  "resetPasswordToken": "2804ba4d377dd923dc07257e6382d123f40e9aa2"
+},
+{
+  "_id": {
+    "$oid": "67aff49a8e03d2565c02a802"
+  },
+  "username": "admin",
+  "email": "admin@gmail.com",
+  "password": "$2a$10$84BZgUuoRYZXSrSJCMjI0eU.jyvryl8VydhUa98pFdU6id9CQdTKy",
+  "age": 30,
+  "role": "admin",
+  "createdAt": {
+    "$date": "2025-02-15T01:57:46.057Z"
+  },
+  "updatedAt": {
+    "$date": "2025-02-15T01:57:46.057Z"
+  }
+},
+{
+  "_id": {
+    "$oid": "67b0ca8357319bb6d209f9c0"
+  },
+  "username": "seiko",
+  "email": "Hyouka789654@gmail.com",
+  "password": "$2a$10$bCOkZi58/iGe64Nw.2dVA.lH4lZf7TnwrM87dqL12lZSO4HUWQD5e",
+  "age": 19,
+  "role": "user",
+  "createdAt": {
+    "$date": "2025-02-15T17:10:27.565Z"
+  },
+  "updatedAt": {
+    "$date": "2025-02-17T06:19:16.637Z"
+  },
+  "__v": 0
+}]
